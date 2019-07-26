@@ -10,6 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "twilio": "^3.33.2"
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "parcel-bundler": "^1.12.3",
+    "twilio": "^3.33.2",
+    "twilio-video": "^2.0.0-beta12"
   }
 }
