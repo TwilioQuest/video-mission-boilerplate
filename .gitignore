@@ -1,2 +1,9 @@
+# NPM dependencies
 node_modules
+
+# Dotenv secrets
 .env
+
+# Parcel bundler directories
+dist
+.cache
