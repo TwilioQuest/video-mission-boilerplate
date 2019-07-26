@@ -1,0 +1,23 @@
+body {
+  display: flex;
+}
+
+video {
+  max-width: 100%;
+}
+
+body > div {
+  flex: 1;
+  padding: 10px;
+}
+
+#you {
+  background-color: bisque;
+}
+
+#others {
+}
+
+#events {
+  background-color: bisque;
+}

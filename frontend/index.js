@@ -8,6 +8,8 @@ fetch(`http://localhost:3000/token/${searchParams.get("name")}`)
   })
   .then(({ identity, token }) => {
     Video.connect(token, { name: "DailyStandup" }).then(room => {
+      showLocalParticipant(room.localParticipant);
+
       room.participants.forEach(participantConnected);
       room.on("participantConnected", participantConnected);
 
@@ -17,6 +19,19 @@ fetch(`http://localhost:3000/token/${searchParams.get("name")}`)
       );
     });
   });
+
+function showLocalParticipant(localParticipant) {
+  const div = document.createElement("div");
+  div.id = localParticipant.sid;
+  div.innerText = localParticipant.identity;
+
+  Array.from(localParticipant.tracks.values()).forEach(({ track }) => {
+    trackSubscribed(div, track);
+  });
+
+  const you = document.getElementById("you");
+  you.appendChild(div);
+}
 
 function participantConnected(participant) {
   const div = document.createElement("div");
@@ -32,7 +47,8 @@ function participantConnected(participant) {
     }
   });
 
-  document.body.appendChild(div);
+  const others = document.getElementById("others");
+  others.appendChild(div);
 }
 
 function participantDisconnected(participant) {
