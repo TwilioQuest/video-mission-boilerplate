@@ -2,23 +2,32 @@ import Video from "twilio-video";
 
 const searchParams = new URLSearchParams(document.location.search);
 
-fetch(`http://localhost:3000/token/${searchParams.get("name")}`)
-  .then(response => {
-    return response.json();
-  })
-  .then(({ identity, token }) => {
-    Video.connect(token, { name: "DailyStandup" }).then(room => {
-      showLocalParticipant(room.localParticipant);
+window.addEventListener("DOMContentLoaded", () => {
+  logEvent(`Requested token for: ${searchParams.get("name")}`);
 
-      room.participants.forEach(participantConnected);
-      room.on("participantConnected", participantConnected);
+  fetch(`http://localhost:3000/token/${searchParams.get("name")}`)
+    .then(response => {
+      return response.json();
+    })
+    .then(({ identity, token }) => {
+      Video.connect(token, { name: searchParams.get("room") }).then(room => {
+        logEvent(
+          `Connected to room: ${room.name} as: ${
+            room.localParticipant.identity
+          }`
+        );
+        showLocalParticipant(room.localParticipant);
 
-      room.on("participantDisconnected", participantDisconnected);
-      room.once("disconnected", error =>
-        room.participants.forEach(participantDisconnected)
-      );
+        room.participants.forEach(participantConnected);
+        room.on("participantConnected", participantConnected);
+
+        room.on("participantDisconnected", participantDisconnected);
+        room.once("disconnected", error =>
+          room.participants.forEach(participantDisconnected)
+        );
+      });
     });
-  });
+});
 
 function showLocalParticipant(localParticipant) {
   const div = document.createElement("div");
@@ -34,6 +43,7 @@ function showLocalParticipant(localParticipant) {
 }
 
 function participantConnected(participant) {
+  logEvent(`Participant connected: ${participant.identity}`);
   const div = document.createElement("div");
   div.id = participant.sid;
   div.innerText = participant.identity;
@@ -52,6 +62,8 @@ function participantConnected(participant) {
 }
 
 function participantDisconnected(participant) {
+  logEvent(`Participant disconnected: ${participant.identity}`);
+
   document.getElementById(participant.sid).remove();
 }
 
@@ -61,4 +73,12 @@ function trackSubscribed(div, track) {
 
 function trackUnsubscribed(track) {
   track.detach().forEach(element => element.remove());
+}
+
+function logEvent(event) {
+  const div = document.createElement("div");
+  div.innerText = event;
+
+  const events = document.getElementById("events");
+  events.appendChild(div);
 }
