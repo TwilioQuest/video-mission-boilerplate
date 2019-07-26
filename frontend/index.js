@@ -2,9 +2,7 @@ import Video from "twilio-video";
 
 const searchParams = new URLSearchParams(document.location.search);
 
-fetch(`http://localhost:3000/token?name=${searchParams.get("name")}`, {
-  cache: "no-cache"
-})
+fetch(`http://localhost:3000/token/${searchParams.get("name")}`)
   .then(response => {
     return response.json();
   })

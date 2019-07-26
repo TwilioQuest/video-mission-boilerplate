@@ -14,15 +14,14 @@ const app = express();
 
 const distPath = path.join(__dirname, "../dist");
 app.use("/", express.static(distPath));
-// app.get("/");
 
 /**
  * Generate an Access Token for a chat application user - it generates a random
  * username for the client requesting a token, and takes a device ID as a query
  * parameter.
  */
-app.get("/token", function(request, response) {
-  const identity = request.query.name || "default-name";
+app.get("/token/:name", function(request, response) {
+  const identity = request.params.name || "default-name";
 
   // Create an access token which we will sign and return to the client,
   // containing the grant we just created.
@@ -52,9 +51,9 @@ server.listen(port, function() {
   console.log("Express server running on *:" + port);
 });
 
-app.get("/new-room", function(request, response) {
+app.get("/room/create/:name", function(request, response) {
   client.video.rooms
-    .create({ uniqueName: "DailyStandup" })
+    .create({ uniqueName: request.params.name })
     .then(room => {
       response.send({
         room
@@ -65,28 +64,21 @@ app.get("/new-room", function(request, response) {
     });
 });
 
-// try {
-//   const client = require("twilio")(
-//     process.env.TWILIO_ACCOUNT_SID,
-//     process.env.TWILIO_API_SECRET
-//   );
-
-//   //   client.video.rooms.create({ uniqueName: "DailyStandup" }).then(room => {
-//   //     console.log(room);
-//   //   });
-
-//   console.log(Object.keys(client.video.rooms("DailyStandup")));
-
-//   //   client.video
-//   //     .rooms("DailyStandup")
-//   //     .fetch()
-//   //     .then(room => {
-//   //       console.log(room);
-//   //       client.video
-//   //         .rooms(room.sid)
-//   //         .update({ status: "completed" })
-//   //         .then(room => console.log(room.uniqueName));
-//   //     });
-// } catch (err) {
-//   console.error(err);
-// }
+app.get("/room/close/:name", function(request, response) {
+  client.video
+    .rooms(request.params.name)
+    .fetch()
+    .then(room => {
+      client.video
+        .rooms(room.sid)
+        .update({ status: "completed" })
+        .then(room => {
+          response.send({
+            room
+          });
+        });
+    })
+    .catch(err => {
+      response.send({ err });
+    });
+});
