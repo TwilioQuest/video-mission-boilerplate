@@ -25,6 +25,10 @@ window.addEventListener("DOMContentLoaded", () => {
         room.once("disconnected", error =>
           room.participants.forEach(participantDisconnected)
         );
+
+        window.addEventListener("beforeunload", event => {
+          room.disconnect();
+        });
       });
     });
 });

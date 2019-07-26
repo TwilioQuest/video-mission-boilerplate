@@ -1,5 +1,6 @@
 body {
   display: flex;
+  margin: 0;
 }
 
 video {
@@ -16,6 +17,7 @@ body > div {
 }
 
 #others {
+  background-color: azure;
 }
 
 #events {
