@@ -22,7 +22,7 @@ app.use("/", express.static(distPath));
  * parameter.
  */
 app.get("/token", function(request, response) {
-  const identity = "test-name";
+  const identity = request.query.name || "default-name";
 
   // Create an access token which we will sign and return to the client,
   // containing the grant we just created.

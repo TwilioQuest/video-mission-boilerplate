@@ -1,68 +1,58 @@
 import Video from "twilio-video";
 
-fetch("http://localhost:3000/token")
+const searchParams = new URLSearchParams(document.location.search);
+
+fetch(`http://localhost:3000/token?name=${searchParams.get("name")}`, {
+  cache: "no-cache"
+})
   .then(response => {
     return response.json();
   })
   .then(({ identity, token }) => {
+    console.log(identity);
     console.log(JSON.stringify(token));
-    Video.connect("token", { name: "room-name" }).then(room => {
+    Video.connect(token, { name: "DailyStandup" }).then(room => {
       console.log('Connected to Room "%s"', room.name);
+      console.log(room);
 
-      //   room.participants.forEach(participantConnected);
-      //   room.on("participantConnected", participantConnected);
+      room.participants.forEach(participantConnected);
+      room.on("participantConnected", participantConnected);
 
-      //   room.on("participantDisconnected", participantDisconnected);
-      //   room.once("disconnected", error =>
-      //     room.participants.forEach(participantDisconnected)
-      //   );
+      room.on("participantDisconnected", participantDisconnected);
+      room.once("disconnected", error =>
+        room.participants.forEach(participantDisconnected)
+      );
     });
   });
 
-// $.getJSON("/token", function(data) {
-//   identity = data.identity;
-//   document.getElementById("room-controls").style.display = "block";
+function participantConnected(participant) {
+  console.log('Participant "%s" connected', participant.identity);
 
-//   // Bind button to join Room.
-//   document.getElementById("button-join").onclick = function() {
-//     roomName = document.getElementById("room-name").value;
-//     if (!roomName) {
-//       alert("Please enter a room name.");
-//       return;
-//     }
+  const div = document.createElement("div");
+  div.id = participant.sid;
+  div.innerText = participant.identity;
 
-//     log("Joining room '" + roomName + "'...");
-//     var connectOptions = {
-//       name: roomName,
-//       logLevel: "debug"
-//     };
+  participant.on("trackSubscribed", track => trackSubscribed(div, track));
+  participant.on("trackUnsubscribed", trackUnsubscribed);
 
-//     if (previewTracks) {
-//       connectOptions.tracks = previewTracks;
-//     }
+  participant.tracks.forEach(publication => {
+    if (publication.isSubscribed) {
+      trackSubscribed(div, publication.track);
+    }
+  });
 
-//     // Join the Room with the token from the server and the
-//     // LocalParticipant's Tracks.
-//     Video.connect(data.token, connectOptions).then(roomJoined, function(error) {
-//       log("Could not connect to Twilio: " + error.message);
-//     });
-//   };
+  document.body.appendChild(div);
+}
 
-//   // Bind button to leave Room.
-//   document.getElementById("button-leave").onclick = function() {
-//     log("Leaving room...");
-//     activeRoom.disconnect();
-//   };
-// });
+function participantDisconnected(participant) {
+  console.log('Participant "%s" disconnected', participant.identity);
+  document.getElementById(participant.sid).remove();
+}
 
-// Video.connect("$TOKEN", { name: "room-name" }).then(room => {
-//   console.log('Connected to Room "%s"', room.name);
+function trackSubscribed(div, track) {
+  div.appendChild(track.attach());
+}
 
-//   //   room.participants.forEach(participantConnected);
-//   //   room.on("participantConnected", participantConnected);
-
-//   //   room.on("participantDisconnected", participantDisconnected);
-//   //   room.once("disconnected", error =>
-//   //     room.participants.forEach(participantDisconnected)
-//   //   );
-// });
+function trackUnsubscribed(track) {
+  track.detach().forEach(element => element.remove());
+}
