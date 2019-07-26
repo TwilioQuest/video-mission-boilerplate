@@ -7,12 +7,7 @@ fetch(`http://localhost:3000/token/${searchParams.get("name")}`)
     return response.json();
   })
   .then(({ identity, token }) => {
-    console.log(identity);
-    console.log(JSON.stringify(token));
     Video.connect(token, { name: "DailyStandup" }).then(room => {
-      console.log('Connected to Room "%s"', room.name);
-      console.log(room);
-
       room.participants.forEach(participantConnected);
       room.on("participantConnected", participantConnected);
 
@@ -24,8 +19,6 @@ fetch(`http://localhost:3000/token/${searchParams.get("name")}`)
   });
 
 function participantConnected(participant) {
-  console.log('Participant "%s" connected', participant.identity);
-
   const div = document.createElement("div");
   div.id = participant.sid;
   div.innerText = participant.identity;
@@ -43,7 +36,6 @@ function participantConnected(participant) {
 }
 
 function participantDisconnected(participant) {
-  console.log('Participant "%s" disconnected', participant.identity);
   document.getElementById(participant.sid).remove();
 }
 
